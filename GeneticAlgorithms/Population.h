@@ -6,13 +6,16 @@ class Population
 public:
 	using Interval = std::pair<double, double>;
 
-	Population(const size_t& populationSize, const size_t& chromosomeSize, double mutationProbability);
+	Population(const size_t& populationSize, const size_t& chromosomeSize, double mutationProbability, double crossoverProbability);
 
 	Population(const Population& other);
 	Population(Population&& other) noexcept;
 
 	Population& operator=(const Population& other);
 	Population& operator=(Population&& other) noexcept;
+
+	void CrossoverPopulation();
+	void MutatePopulation();
 
 	~Population() = default;
 
@@ -26,7 +29,10 @@ public:
 	std::function<double(const Chromosome&)> GetFitnessFunction() const;
 
 	void Selection();
+
+	void Fit(size_t epochs);
 private:
+
 	std::function<double(const Chromosome&)>
 		m_fitnessFunction = [this](const Chromosome& chromosome) -> double {
 		auto values = chromosome.GetDecimal();
@@ -40,8 +46,11 @@ private:
 		};
 
 	std::vector<Chromosome> m_population;
-	double m_mutationProbability;
 	Interval m_intervalX;
 	Interval m_intervalY;
+
+	size_t m_chromosomeSize;
+	double m_mutationProbability;
+	double m_crossoverProbability;
 };
 

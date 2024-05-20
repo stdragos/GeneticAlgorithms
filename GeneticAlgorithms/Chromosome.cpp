@@ -64,3 +64,16 @@ size_t Chromosome::GetSize() const
 	return m_chromosome.size();
 }
 
+void Chromosome::Mutate(const size_t& pos)
+{
+	m_chromosome[pos] = !m_chromosome[pos];
+}
+
+void Chromosome::Crossover(const size_t& pos, Chromosome& other)
+{
+	for (size_t index = pos; index < other.m_chromosome.size(); ++index)
+	{
+		swap(m_chromosome[index], other.m_chromosome[index]);
+	}
+}
+

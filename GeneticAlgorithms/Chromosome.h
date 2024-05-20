@@ -22,7 +22,7 @@ public:
 	std::string ToString() const;
 	double GetFitnessValue(std::function<double(const std::vector<bool>&)> fitnessFunction) const;
 	void Mutate(const size_t& pos);
-	void Crossover(Chromosome& other);
+	void Crossover(const size_t& pos, Chromosome& other);
 	std::pair<double, double> GetDecimal() const;
 	size_t GetSize() const;
 

@@ -1,7 +1,8 @@
 #include "Population.h"
+#include <iostream>
 
-Population::Population(const size_t& populationSize, const size_t& chromosomeSize, double mutationProbability) :
-	m_mutationProbability{ mutationProbability }
+Population::Population(const size_t& populationSize, const size_t& chromosomeSize, double mutationProbability, double crossoverProbability) :
+	m_mutationProbability{ mutationProbability }, m_crossoverProbability { crossoverProbability }, m_chromosomeSize { chromosomeSize }
 {
 	std::random_device rd;
 	std::mt19937 generator(rd());
@@ -11,9 +12,9 @@ Population::Population(const size_t& populationSize, const size_t& chromosomeSiz
 
 	for (size_t curr = 0; curr < populationSize; ++curr)
 	{
-		currentChromosome.resize(chromosomeSize);
+		currentChromosome.resize(m_chromosomeSize);
 
-		for (size_t gene = 0; gene < chromosomeSize; ++gene)
+		for (size_t gene = 0; gene < m_chromosomeSize; ++gene)
 			currentChromosome[gene] = distribution(generator);
 
 		m_population.emplace_back(currentChromosome);
@@ -103,6 +104,21 @@ std::function<double(const Chromosome&)> Population::GetFitnessFunction() const
 	return m_fitnessFunction;
 }
 
+void Population::Fit(size_t epochs)
+{
+	for (size_t epoch = 0; epoch < epochs; ++epoch)
+	{
+		Selection();
+		CrossoverPopulation();
+		MutatePopulation();
+		
+		std::cout << "Epoch " << epoch << '\n';
+		std::cout << ToString() << '\n';
+		auto maxChromosome = GetMax();
+		std::cout << maxChromosome.ToString() << '\n' << maxChromosome.GetFitnessValue(m_fitnessFunction) << "\n\n";
+	}
+}
+
 void Population::Selection()
 {
 	double sum = 0.f;
@@ -145,4 +161,60 @@ void Population::Selection()
 	}
 
 	m_population = newPopulation;
+}
+
+void Population::CrossoverPopulation()
+{
+	const double epsilon = 1e-6;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> distValue(epsilon, 1.0 + epsilon);
+
+	std::vector<size_t> parentsIndices = std::vector<size_t>();
+
+	for (size_t chromosomeIndex = 0; chromosomeIndex < m_population.size(); ++chromosomeIndex)
+	{
+		const double randomValue = distValue(gen);
+
+		if (randomValue < m_crossoverProbability)
+		{
+			parentsIndices.push_back(chromosomeIndex);
+		}
+	}
+
+	if (parentsIndices.size() % 2)
+	{
+		parentsIndices.erase(parentsIndices.end() - 1);
+	}
+
+	auto rng = std::default_random_engine{ rd() };
+	std::shuffle(std::begin(parentsIndices), std::end(parentsIndices), rng);
+	std::uniform_int_distribution<> distPos(0, m_chromosomeSize - 1);
+
+	for (size_t parentIndex = 0; parentIndex < parentsIndices.size(); parentIndex += 2)
+	{
+		const int randomPos = distPos(gen);
+		m_population[parentIndex].Crossover(randomPos, m_population[parentIndex + 1]);
+	}
+}
+
+void Population::MutatePopulation()
+{
+	const double epsilon = 1e-6;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> distValue(epsilon, 1.0 + epsilon);
+
+	for (auto& chromosome : m_population)
+	{
+		for (size_t indexChromosome = 0; indexChromosome < m_chromosomeSize; ++indexChromosome)
+		{
+			const double randomValue = distValue(gen);
+
+			if (randomValue < m_mutationProbability)
+			{
+				chromosome.Mutate(indexChromosome);
+			}
+		}
+	}
 }
