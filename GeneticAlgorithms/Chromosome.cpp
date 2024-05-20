@@ -39,8 +39,28 @@ std::string Chromosome::ToString() const
 	return aux;
 }
 
-float Chromosome::GetFitnessValue(std::function<float(const std::vector<bool>&)> fitnessFunction) const
+double Chromosome::GetFitnessValue(std::function<double(const std::vector<bool>&)> fitnessFunction) const
 {
 	return fitnessFunction(m_chromosome);
+}
+
+std::pair<double, double> Chromosome::GetDecimal() const
+{
+	int power = 1;
+	int x = 0;
+	int y = 0;
+
+	for (int i = m_chromosome.size() / 2 - 1; i >= 0; --i) {
+		x += power * m_chromosome[i];
+		y += power * m_chromosome[i + m_chromosome.size() / 2];
+		power *= 2;
+	}
+
+	return { x, y };
+}
+
+size_t Chromosome::GetSize() const
+{
+	return m_chromosome.size();
 }
 

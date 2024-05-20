@@ -7,6 +7,7 @@
 class Chromosome
 {
 public:
+	Chromosome() = default;
 	Chromosome(const std::vector<bool>& chromosome);
 
 	Chromosome(const Chromosome& other);
@@ -19,9 +20,11 @@ public:
 
 
 	std::string ToString() const;
-	float GetFitnessValue(std::function<float(const std::vector<bool>&)> fitnessFunction) const;
+	double GetFitnessValue(std::function<double(const std::vector<bool>&)> fitnessFunction) const;
 	void Mutate(const size_t& pos);
 	void Crossover(Chromosome& other);
+	std::pair<double, double> GetDecimal() const;
+	size_t GetSize() const;
 
 private:
 	std::vector<bool> m_chromosome;
