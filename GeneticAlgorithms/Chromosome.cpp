@@ -15,6 +15,31 @@ Chromosome::Chromosome(const std::vector<bool>& chromosome)
 	m_chromosome = chromosome;
 }
 
+Chromosome::Chromosome(const Chromosome& other)
+{
+	*this = other;
+}
+
+Chromosome::Chromosome(Chromosome&& other) noexcept
+{
+	*this = std::move(other);
+}
+
+Chromosome& Chromosome::operator=(const Chromosome& other)
+{
+	if (this != &other)
+		m_chromosome = other.m_chromosome;
+	return *this;
+}
+
+Chromosome& Chromosome::operator=(Chromosome&& other) noexcept
+{
+	if (this != &other)
+		m_chromosome = std::exchange(other.m_chromosome, std::vector<bool>());
+
+	return *this;
+}
+
 std::string Chromosome::ToString() const
 {
 	std::string aux = "";
