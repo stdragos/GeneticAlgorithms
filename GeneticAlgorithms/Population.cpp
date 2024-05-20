@@ -1,5 +1,5 @@
 #include "Population.h"
-#include <iostream>
+
 
 Population::Population(const size_t& populationSize, const size_t& chromosomeSize, double mutationProbability, double crossoverProbability) :
 	m_mutationProbability{ mutationProbability }, m_crossoverProbability { crossoverProbability }, m_chromosomeSize { chromosomeSize }
@@ -54,20 +54,16 @@ Population& Population::operator=(Population&& other) noexcept
 	return *this;
 }
 
-std::string Population::ToString() const
+std::ostream& operator<<(std::ostream& out, const Population& population)
 {
-	std::string toString = "";
+	for (const auto& chromosome : population.m_population)
+		out << "Chromosome " <<
+		chromosome <<
+		"\nValue " <<
+		chromosome.GetFitnessValue(population.GetFitnessFunction()) <<
+		'\n';
 
-	for (const auto& chromosome : m_population)
-	{
-		toString += "Chromosome "
-			+ chromosome.ToString()
-			+ '\n' + "Value "
-			+ std::to_string(chromosome.GetFitnessValue(m_fitnessFunction))
-			+ '\n';
-	}
-
-	return toString;
+	return out;
 }
 
 void Population::SetIntervalX(const Interval& interval)
@@ -104,19 +100,42 @@ std::function<double(const Chromosome&)> Population::GetFitnessFunction() const
 	return m_fitnessFunction;
 }
 
-void Population::Fit(size_t epochs)
+std::pair<Chromosome, size_t> Population::Fit(size_t epochs, std::ostream& out)
 {
-	for (size_t epoch = 0; epoch < epochs; ++epoch)
+	Chromosome best;
+	size_t bestEpoch = -1;
+
+	for (size_t epoch = 1; epoch <= epochs; ++epoch)
 	{
 		Selection();
-		CrossoverPopulation();
-		MutatePopulation();
-		
-		std::cout << "Epoch " << epoch << '\n';
-		std::cout << ToString() << '\n';
+		Crossover();
+		Mutation();
+
 		auto maxChromosome = GetMax();
-		std::cout << maxChromosome.ToString() << '\n' << maxChromosome.GetFitnessValue(m_fitnessFunction) << "\n\n";
+
+		out << "Epoch " << epoch << '\n';
+		out << *this;
+		out << "Best chromosome: \n";
+		out << maxChromosome << '\n' << "Value: "
+			<< maxChromosome.GetFitnessValue(m_fitnessFunction) << "\n\n";
+
+
+		if(bestEpoch != -1)
+		{
+			if (maxChromosome.GetFitnessValue(m_fitnessFunction) > best.GetFitnessValue(m_fitnessFunction))
+			{
+				best = maxChromosome;
+				bestEpoch = epoch;
+			}
+		}
+		else
+		{
+			best = maxChromosome;
+			bestEpoch = epoch;
+		}
 	}
+
+	return { best, bestEpoch };
 }
 
 void Population::Selection()
@@ -163,7 +182,7 @@ void Population::Selection()
 	m_population = newPopulation;
 }
 
-void Population::CrossoverPopulation()
+void Population::Crossover()
 {
 	const double epsilon = 1e-6;
 	std::random_device rd;
@@ -198,7 +217,7 @@ void Population::CrossoverPopulation()
 	}
 }
 
-void Population::MutatePopulation()
+void Population::Mutation()
 {
 	const double epsilon = 1e-6;
 	std::random_device rd;

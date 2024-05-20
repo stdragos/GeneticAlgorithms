@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <random>
+#include <iostream>
 
 class Chromosome
 {
@@ -18,8 +19,8 @@ public:
 
 	~Chromosome() = default;
 
+	friend std::ostream& operator<<(std::ostream& out, const Chromosome&);
 
-	std::string ToString() const;
 	double GetFitnessValue(std::function<double(const std::vector<bool>&)> fitnessFunction) const;
 	void Mutate(const size_t& pos);
 	void Crossover(const size_t& pos, Chromosome& other);

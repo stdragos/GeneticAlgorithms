@@ -1,6 +1,7 @@
 #pragma once
 #include "Chromosome.h"
 
+
 class Population
 {
 public:
@@ -14,12 +15,14 @@ public:
 	Population& operator=(const Population& other);
 	Population& operator=(Population&& other) noexcept;
 
-	void CrossoverPopulation();
-	void MutatePopulation();
+	void Crossover();
+	void Mutation();
+	void Selection();
 
 	~Population() = default;
 
-	std::string ToString() const;
+	friend std::ostream& operator<<(std::ostream&, const Population& population);
+
 	void SetIntervalX(const Interval&);
 	void SetIntervalY(const Interval&);
 	void SetFitnessFunction(const std::function<double(const Chromosome&)>&);
@@ -28,9 +31,9 @@ public:
 	Chromosome GetMax() const;
 	std::function<double(const Chromosome&)> GetFitnessFunction() const;
 
-	void Selection();
+	
 
-	void Fit(size_t epochs);
+	std::pair<Chromosome, size_t> Fit(size_t epochs, std::ostream& out = std::cout);
 private:
 
 	std::function<double(const Chromosome&)>

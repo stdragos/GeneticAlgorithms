@@ -30,15 +30,6 @@ Chromosome& Chromosome::operator=(Chromosome&& other) noexcept
 	return *this;
 }
 
-std::string Chromosome::ToString() const
-{
-	std::string aux = "";
-	for (const auto& gene : m_chromosome)
-		aux += gene ? '1' : '0';
-
-	return aux;
-}
-
 double Chromosome::GetFitnessValue(std::function<double(const std::vector<bool>&)> fitnessFunction) const
 {
 	return fitnessFunction(m_chromosome);
@@ -77,3 +68,13 @@ void Chromosome::Crossover(const size_t& pos, Chromosome& other)
 	}
 }
 
+std::ostream& operator<<(std::ostream& out, const Chromosome& chromosome)
+{
+	std::string aux = "";
+	for (const auto& gene : chromosome.m_chromosome)
+		aux += gene ? '1' : '0';
+
+	out << aux;
+
+	return out;
+}
